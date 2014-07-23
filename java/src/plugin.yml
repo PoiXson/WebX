@@ -1,0 +1,15 @@
+name: WebX
+main: com.poixson.webx.WebX
+version: 1.2.0
+Author: lorenzop
+website: https://github.com/PoiXson/WebX
+softdepend: [Vault]
+commands:
+  webx:
+    description: WebX
+    usage: Sorry, not currently used for anything.
+permissions:
+  webx.*:
+    description: Sorry, not currently used for anything.
+    default: false
+
