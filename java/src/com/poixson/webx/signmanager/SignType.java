@@ -62,6 +62,18 @@ public abstract class SignType {
 		public final long y;
 		public final long z;
 
+	// permissions
+	protected abstract boolean canCreateSign(final Player player);
+	protected abstract boolean canRemoveSign(final Player player);
+	protected abstract boolean canUseSign   (final Player player);
+
+
+
+	// language messages
+	protected abstract String msgSignCreated();
+	protected abstract String msgSignRemoved();
+	protected abstract String msgNoPermission();
+	protected abstract String msgNoCheating();
 		public SignLocation(final String world,
 				final long x, final long y, final long z) {
 			this.world = world;

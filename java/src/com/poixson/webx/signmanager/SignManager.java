@@ -32,7 +32,7 @@ public class SignManager implements Listener {
 
 	// first line
 	protected final String masterLine;
-	protected final Set<String> masterAliases = new CopyOnWriteArraySet<String>();
+	protected final String[] masterAliases;
 
 	// sign types
 	protected final Set<SignType> signTypes = new CopyOnWriteArraySet<SignType>();
@@ -44,12 +44,14 @@ public class SignManager implements Listener {
 
 
 	// new sign manager
-	public SignManager(final String masterLine) {
-		this.masterLine = masterLine;
-	}
 	public SignManager(final String masterLine, final String[] masterAliases) {
-		this(masterLine);
-		addMasterAliases(masterAliases);
+		if(utils.isEmpty(masterLine)) throw new NullPointerException();
+		this.masterLine = masterLine;
+		this.masterAliases = (utils.isEmpty(masterAliases)) ? null : masterAliases.clone();
+	}
+	public SignManager(final String masterLine) {
+		this(masterLine, null);
+	}
 	}
 
 
@@ -60,19 +62,6 @@ public class SignManager implements Listener {
 	}
 	public dbPool db() {
 		return this.db;
-	}
-
-
-
-	// first line
-	public void addMasterAlias(final String line) {
-		if(line == null || line.isEmpty()) return;
-		this.masterAliases.add(line);
-	}
-	public void addMasterAliases(final String[] lines) {
-		if(lines == null) return;
-		for(final String line : lines)
-			this.addMasterAlias(line);
 	}
 
 
@@ -305,20 +294,16 @@ public class SignManager implements Listener {
 
 
 
-	protected String getClickSpamMsg() {
-		return "Please wait a bit before using that again.";
+	// default messages
+	protected String msgClickSpam() {
+		return "Please wait.";
 	}
-	protected String getPermissionDeniedMsg() {
-		return "You don't have permission to do that.";
-	}
-	protected String getSignRemovedMsg() {
-		return "WebAuctionPlus sign removed.";
+	protected String msgInvalidSign() {
+		return "Invalid sign.";
 	}
 
 
 
-	protected String getSignRemovePermNode() {
-		return "wa.sign.remove";
 	}
 
 
