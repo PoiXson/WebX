@@ -1,66 +1,124 @@
 package com.poixson.webx.signmanager;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.bukkit.Location;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEvent;
+
+import com.poixson.commonjava.Utils.utils;
+import com.poixson.commonjava.Utils.utilsString;
+import com.poixson.commonjava.Utils.byRef.boolRef;
+import com.poixson.commonjava.pxdb.dbQuery;
+import com.poixson.commonjava.xLogger.xLog;
 
 
 public abstract class SignType {
 
 	protected final Set<Location> locations = new CopyOnWriteArraySet<Location>();
 
-
-
-	// validate sign
-	/**
-	 * Match the second line of a sign with possible aliases.
-	 * @param lines - Sign contents to be parsed.
-	 * @return true if line matches; false if not this sign type.
-	 */
-	public abstract boolean ValidateSign(String[] lines);
-	/**
-	 * Used after initial validation, to sanitize last 3 lines.
-	 * @param lines - Sign contents, to be parsed and formatted.
-	 * @return true if sign changed; false if sign is perfect.
-	 */
-	public abstract boolean FullValidateSign(String[] lines);
-
-	// permissions
-	public abstract boolean canCreateSign(final Player player);
-	public abstract boolean canRemoveSign(final Player player);
-	public abstract boolean canUseSign   (final Player player);
-
-	// queries
-	public abstract void queryAddSign   (final Sign sign);
-	public abstract void queryRemoveSign(final Sign sign);
-
-	// events
-	public abstract void SignClicked(final Sign sign, final Player player);
+	protected final String dbKey;
 
 
 
-	// sign location dao
-	public SignLocation getSignLocation(final String world,
-			final long x, final long y, final long z) {
-		for(final SignLocation loc : this.locations) {
-			if(loc.world.equalsIgnoreCase(world) &&
-					loc.x == x && loc.y == y && loc.z == z)
-				return loc;
+	public SignType(final String dbKey, final String typeName) {
+		if(dbKey    == null || dbKey.isEmpty()   ) throw new NullPointerException("dbKey not set");
+		if(typeName == null || typeName.isEmpty()) throw new NullPointerException();
+		this.dbKey = dbKey;
+		// query db for signs
+		{
+			final dbQuery db = dbQuery.get(dbKey);
+			signDataQueries.querySigns(db, typeName, this.locations);
+			db.release();
 		}
+	}
+
+
+
+	/**
+	 * Validated sign click event
+	 * @param event
+	 * @param lines String[]
+	 */
+	public abstract void SignClicked(final PlayerInteractEvent event, final String[] lines);
+
+
+
+	/**
+	 * Validate a new sign to this type.
+	 * @param player - Player affected by the event.
+	 * @param lines - Sign contents to be parsed.
+	 * @return true if line matches; false if not this sign type; null if invalid
+	 */
+	protected abstract Boolean ValidateSign(final Player player, final boolRef changed, String[] lines);
+
+
+
+	// sign exists in this location
+	public boolean hasLocation(final String world,
+			final long x, final long y, final long z) {
+		if(utils.isEmpty(world)) return false;
+		for(final Location loc : this.locations) {
+			if(!loc.getWorld().getName().equalsIgnoreCase(world)) continue;
+			if( loc.getBlockX() != x ||
+				loc.getBlockY() != y ||
+				loc.getBlockZ() != z) continue;
+			return true;
+		}
+		return false;
+	}
+	public boolean hasLocation(final Location location) {
+		if(location == null) return false;
+		return this.hasLocation(
+			location.getWorld().getName(),
+			location.getBlockX(),
+			location.getBlockY(),
+			location.getBlockZ()
+		);
+	}
+	// new sign
+	protected void addLocation(final Location location) {
+		if(location == null) throw new NullPointerException();
+		this.locations.add(location);
+		signDataQueries.queryAddSign(this.dbKey, location, this);
+	}
+	/**
+	 * Remove plugin sign.
+	 * @param location Location of the sign.
+	 * @return true if success; false if not relevant
+	 */
+	protected boolean removeLocation(final Location location) {
+		if(location == null) throw new NullPointerException();
+		if(!this.hasLocation(location)) return false;
+		// remove from cache
+		this.locations.remove(location);
+		// remove from db
+		signDataQueries.queryRemoveSign(this.dbKey, location);
+		return true;
+	}
+
+
+
+	protected Integer parseLineValue(final String line, final String[] units) {
+		String str = utilsString.trims(line.trim(), "[", "]");
+		if(utils.isEmpty(str)) return null;
+		String st = str.toLowerCase();
+		for(final String unit : units) {
+			try {
+				if(st.startsWith(unit.toLowerCase())) {
+					str = str.substring(unit.length()).trim();
+					st  = str.toLowerCase();
+				}
+			} catch (Exception ignore) {}
+		}
+		try {
+			return Integer.valueOf(Integer.parseInt(str));
+		} catch (NumberFormatException ignore) {}
 		return null;
 	}
 
-	public static class SignLocation {
 
-		public final String world;
-		public final long x;
-		public final long y;
-		public final long z;
 
 	// permissions
 	protected abstract boolean canCreateSign(final Player player);
@@ -74,20 +132,12 @@ public abstract class SignType {
 	protected abstract String msgSignRemoved();
 	protected abstract String msgNoPermission();
 	protected abstract String msgNoCheating();
-		public SignLocation(final String world,
-				final long x, final long y, final long z) {
-			this.world = world;
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-		public SignLocation(final ResultSet rs) throws SQLException {
-			this.world = rs.getString("world");
-			this.x = rs.getLong("x");
-			this.y = rs.getLong("y");
-			this.z = rs.getLong("z");
-		}
 
+
+
+	// logger
+	public static xLog log() {
+		return SignManager.log();
 	}
 
 
