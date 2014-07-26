@@ -8,7 +8,7 @@ public class WebX extends pxnBukkitPlugin {
 
 
 	public WebX() {
-		super("webx");
+		super("webx", "WebX");
 	}
 
 

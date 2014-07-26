@@ -12,6 +12,10 @@ public abstract class pxnBukkitPlugin extends JavaPlugin {
 
 	private static Map<String, pxnBukkitPlugin> plugins = new ConcurrentHashMap<String, pxnBukkitPlugin>();
 
+	// plugin info
+	protected final String name;
+	protected final String title;
+//	private volatile String availableVersion = null;
 	// plugin state
 	public enum PluginState {CLOSED, LOADING, OK, STOPPING, FAILED};
 	private volatile PluginState state = PluginState.CLOSED;
@@ -27,7 +31,7 @@ public abstract class pxnBukkitPlugin extends JavaPlugin {
 		return plugins.get(name);
 	}
 	// new plugin instance
-	public pxnBukkitPlugin(final String name) {
+	public pxnBukkitPlugin(final String name, final String title) {
 		// only allow one instance of each plugin
 		synchronized(plugins) {
 			if(plugins.containsKey(name))
@@ -36,6 +40,8 @@ public abstract class pxnBukkitPlugin extends JavaPlugin {
 			plugins.put(name, this);
 			this.state = PluginState.CLOSED;
 		}
+		this.name  = name;
+		this.title = title;
 		this.InitPlugin();
 	}
 
@@ -46,7 +52,8 @@ public abstract class pxnBukkitPlugin extends JavaPlugin {
 		switch(this.state) {
 		// previous fail
 		case FAILED:
-			log().info("Plugin '"+this.getName()+"' has previously failed. Trying again..");
+			log().warning("Plugin "+this.title()+" has previously failed. Trying again..");
+			this.failMessages.clear();
 			this.state = PluginState.CLOSED;
 			break;
 		// bad state?
@@ -99,6 +106,35 @@ public abstract class pxnBukkitPlugin extends JavaPlugin {
 
 
 
+	public String getDisplayName() {
+		return this.title+" "+this.getVersion();
+	}
+	public String name() {
+		return this.name;
+	}
+	public String title() {
+		return this.title;
+	}
+
+
+
+	// plugin version
+	public String getVersion() {
+		return getDescription().getVersion();
+	}
+	// available version
+	public String getAvailableVersion() {
+//TODO:
+		return null;
+	}
+	// new version is available
+	public String isUpdateAvailable() {
+//TODO:
+		return null;
+	}
+
+
+
 	// plugin startup failed
 	public boolean hasFailed() {
 		return PluginState.FAILED.equals(this.state);
@@ -108,7 +144,7 @@ public abstract class pxnBukkitPlugin extends JavaPlugin {
 		this.state = PluginState.FAILED;
 		if(msg != null && !msg.isEmpty())
 			this.failMessages.add(msg);
-		log().severe("Failed to load "+this.getName()+" "+msg);
+		log().severe("Failed to load "+this.title()+" "+msg);
 		if(!hasAlreadyFailed)
 			this.onDisable();
 	}
