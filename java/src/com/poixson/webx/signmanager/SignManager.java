@@ -25,7 +25,7 @@ import com.poixson.commonjava.Utils.xTime;
 import com.poixson.commonjava.Utils.byRef.boolRef;
 import com.poixson.commonjava.pxdb.dbPool;
 import com.poixson.commonjava.xLogger.xLog;
-import com.poixson.webx.bukkit.pxnBukkitPlugin;
+import com.poixson.webx.bukkit.bukkitUtils;
 
 
 public class SignManager implements Listener {
@@ -112,7 +112,7 @@ public class SignManager implements Listener {
 		final Sign sign;
 		{
 			final Block block = event.getClickedBlock();
-			if(!pxnBukkitPlugin.isSign(block)) return;
+			if(!bukkitUtils.isSign(block)) return;
 			sign = (Sign) block.getState();
 			if(sign == null) return;
 		}
@@ -181,7 +181,7 @@ public class SignManager implements Listener {
 		final Sign sign;
 		{
 			final Block block = event.getBlock();
-			if(!pxnBukkitPlugin.isSign(block)) return;
+			if(!bukkitUtils.isSign(block)) return;
 			sign = (Sign) block.getState();
 			if(sign == null) return;
 		}
