@@ -3,12 +3,13 @@ package com.poixson.webx;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
+import com.poixson.commonjava.Utils.utils;
 import com.poixson.commonjava.Utils.utilsDirFile;
 import com.poixson.commonjava.Utils.utilsSan;
 import com.poixson.commonjava.Utils.utilsString;
@@ -17,7 +18,8 @@ import com.poixson.commonjava.xLogger.xLog;
 
 public class xLang {
 
-	protected final Map<String, String> phrases = new HashMap<String, String>();
+	protected final Map<String, String> phrases  = new ConcurrentHashMap<String, String>();
+	protected final Map<String, String[]> arrays = new ConcurrentHashMap<String, String[]>();
 	protected volatile String currentLang = null;
 
 
@@ -28,6 +30,7 @@ public class xLang {
 	public void LoadDefaults() {
 		synchronized(this.phrases) {
 			this.phrases.clear();
+			this.arrays.clear();
 			this.doLoadDefaults();
 		}
 	}
@@ -39,15 +42,22 @@ public class xLang {
 		//addDefault("", "");
 	}
 	protected void addDefault(final String name, final String msg) {
-		if(name == null || name.isEmpty()) throw new NullPointerException();
-		if(msg  == null || msg.isEmpty() ) throw new NullPointerException();
+		if(utils.isEmpty(name)) throw new NullPointerException();
+		if(utils.isEmpty(msg) ) throw new NullPointerException();
 		this.phrases.put(name, msg);
+	}
+	protected void addDefault(final String name, final String[] msgs) {
+		if(utils.isEmpty(name)) throw new NullPointerException();
+		if(msgs == null)        throw new NullPointerException();
+		this.arrays.put(name, msgs);
 	}
 
 
 
 	// load language file
 	public boolean Load(final Plugin plugin, final String lang) {
+		if(plugin == null)      throw new NullPointerException();
+		if(utils.isEmpty(lang)) throw new NullPointerException("lang not set, cannot load");
 		// load defaults first
 		this.LoadDefaults();
 		// load lang file
@@ -59,8 +69,18 @@ public class xLang {
 				if(yml != null) {
 					// populate phrases
 					synchronized(this.phrases) {
-						for(final String key : yml.getKeys(false))
-							this.phrases.put(key, yml.getString(key));
+						for(final String key : yml.getKeys(false)) {
+							// msg string
+							if(this.phrases.containsKey(key))
+								this.phrases.put(key, yml.getString(key));
+							else
+							// msg array
+							if(this.arrays.containsKey(key))
+								this.arrays.put(key, yml.getStringList(key).toArray(new String[0]));
+							// unknown type
+							else
+								log().warning("Unknown lang key in "+utilsString.ensureEnds(".yml", langSan)+" '"+key+"'");
+						}
 					}
 					this.currentLang = langSan;
 					return true;
@@ -75,7 +95,7 @@ public class xLang {
 
 
 	// find and load .yml file
-	public YamlConfiguration LoadYaml(final Plugin plugin, final String filename) {
+	private YamlConfiguration LoadYaml(final Plugin plugin, final String filename) {
 		YamlConfiguration yml = null;
 		final String fname = utilsString.ensureEnds(".yml", filename);
 		// load from plugins/
@@ -129,15 +149,19 @@ public class xLang {
 	// get message/phrase
 	public String getMsg(final String key) {
 		if(key == null || key.isEmpty()) throw new NullPointerException();
-		synchronized(this.phrases) {
-			if(phrases.containsKey(key)) {
-				final String msg = this.phrases.get(key);
-				if(msg != null && !msg.isEmpty())
-					return msg;
-			}
-		}
+		final String msg = this.phrases.get(key);
+		if(!utils.isEmpty(msg))
+			return msg;
 		log().severe("Language message/phrase not found: "+key);
 		return "<lang:"+key+">";
+	}
+	public String[] getMsgArray(final String key) {
+		if(key == null || key.isEmpty()) throw new NullPointerException();
+		final String[] arr = this.arrays.get(key);
+		if(arr != null)
+			return arr;
+		log().severe("Language message/phrase not found: "+key);
+		return null;
 	}
 
 
