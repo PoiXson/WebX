@@ -276,18 +276,19 @@ public class SignManager implements Listener {
 	/**
 	 * Prevent click spamming.
 	 * @param player
-	 * @return true if click event is ok to process; false if spam
+	 * @return true if click spam; false if ok
 	 */
 	protected boolean debounce(final Player player) {
 		final String uuid = player.getUniqueId().toString();
 		final CoolDown cool = this.debounce.get(uuid);
 		if(cool == null) {
 			this.debounce.put(uuid, CoolDown.get(this.debounceTime));
-			return true;
+			return false;
 		}
 		if(cool.runAgain())
-			return true;
-		return false;
+			return false;
+		player.sendMessage(this.msgClickSpam());
+		return true;
 	}
 
 

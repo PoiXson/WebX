@@ -5,13 +5,14 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 
 public abstract class SignType {
 
-	protected final Set<SignLocation> locations = new CopyOnWriteArraySet<SignLocation>();
+	protected final Set<Location> locations = new CopyOnWriteArraySet<Location>();
 
 
 
