@@ -1,4 +1,4 @@
-package com.poixson.webx.signmanager;
+package com.poixson.webx.pluginsigns;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -11,11 +11,11 @@ import com.poixson.commonjava.pxdb.dbQuery;
 import com.poixson.commonjava.xLogger.xLog;
 
 
-public class signDataQueries {
+public class signQueries {
 
 
 
-	private signDataQueries() {}
+	private signQueries() {}
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();

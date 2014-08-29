@@ -1,4 +1,4 @@
-package com.poixson.webx.signmanager;
+package com.poixson.webx.pluginsigns;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.poixson.webx.signmanager;
+package com.poixson.webx.pluginsigns;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -29,7 +29,7 @@ public abstract class SignType {
 		// query db for signs
 		{
 			final dbQuery db = dbQuery.get(dbKey);
-			signDataQueries.querySigns(db, typeName, this.locations);
+			signQueries.querySigns(db, typeName, this.locations);
 			db.release();
 		}
 	}
@@ -81,7 +81,7 @@ public abstract class SignType {
 	protected void addLocation(final Location location) {
 		if(location == null) throw new NullPointerException();
 		this.locations.add(location);
-		signDataQueries.queryAddSign(this.dbKey, location, this);
+		signQueries.queryAddSign(this.dbKey, location, this);
 	}
 	/**
 	 * Remove plugin sign.
@@ -94,7 +94,7 @@ public abstract class SignType {
 		// remove from cache
 		this.locations.remove(location);
 		// remove from db
-		signDataQueries.queryRemoveSign(this.dbKey, location);
+		signQueries.queryRemoveSign(this.dbKey, location);
 		return true;
 	}
 
