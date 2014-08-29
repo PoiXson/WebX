@@ -11,11 +11,11 @@ import com.poixson.commonjava.pxdb.dbQuery;
 import com.poixson.commonjava.xLogger.xLog;
 
 
-public class signQueries {
+public class SignQueries {
 
 
 
-	private signQueries() {}
+	private SignQueries() {}
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();

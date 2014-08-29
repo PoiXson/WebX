@@ -29,7 +29,7 @@ public abstract class SignType {
 		// query db for signs
 		{
 			final dbQuery db = dbQuery.get(dbKey);
-			signQueries.querySigns(db, typeName, this.locations);
+			SignQueries.querySigns(db, typeName, this.locations);
 			db.release();
 		}
 	}
@@ -81,7 +81,7 @@ public abstract class SignType {
 	protected void addLocation(final Location location) {
 		if(location == null) throw new NullPointerException();
 		this.locations.add(location);
-		signQueries.queryAddSign(this.dbKey, location, this);
+		SignQueries.queryAddSign(this.dbKey, location, this);
 	}
 	/**
 	 * Remove plugin sign.
@@ -94,7 +94,7 @@ public abstract class SignType {
 		// remove from cache
 		this.locations.remove(location);
 		// remove from db
-		signQueries.queryRemoveSign(this.dbKey, location);
+		SignQueries.queryRemoveSign(this.dbKey, location);
 		return true;
 	}
 
