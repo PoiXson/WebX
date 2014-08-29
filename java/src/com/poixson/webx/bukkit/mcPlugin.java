@@ -8,9 +8,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
-public abstract class pxnBukkitPlugin extends JavaPlugin {
+public abstract class mcPlugin extends JavaPlugin {
 
-	private static Map<String, pxnBukkitPlugin> plugins = new ConcurrentHashMap<String, pxnBukkitPlugin>();
+	private static Map<String, mcPlugin> plugins = new ConcurrentHashMap<String, mcPlugin>();
 
 	// plugin info
 	protected final String name;
@@ -26,12 +26,12 @@ public abstract class pxnBukkitPlugin extends JavaPlugin {
 
 
 	// get plugin by name
-	public static pxnBukkitPlugin getPlugin(final String name) {
+	public static mcPlugin getPlugin(final String name) {
 		if(name == null || name.isEmpty()) return null;
 		return plugins.get(name);
 	}
 	// new plugin instance
-	public pxnBukkitPlugin(final String name, final String title) {
+	public mcPlugin(final String name, final String title) {
 		// only allow one instance of each plugin
 		synchronized(plugins) {
 			if(plugins.containsKey(name))
