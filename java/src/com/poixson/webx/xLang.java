@@ -20,7 +20,8 @@ public class xLang {
 
 	protected final Map<String, String> phrases  = new ConcurrentHashMap<String, String>();
 	protected final Map<String, String[]> arrays = new ConcurrentHashMap<String, String[]>();
-	protected volatile String currentLang = null;
+	// null=not loaded  ""=defaults
+	protected volatile String current = null;
 
 
 
@@ -32,6 +33,7 @@ public class xLang {
 			this.phrases.clear();
 			this.arrays.clear();
 			this.doLoadDefaults();
+			this.current = "";
 		}
 	}
 
@@ -78,11 +80,17 @@ public class xLang {
 			try {
 				final String langSan = utilsSan.FileName(lang);
 				//if(langSan.length() != 2) throw new IllegalArgumentException("lang must be specified as 2 letters");
-				final YamlConfiguration yml = LoadYaml(plugin, "languages/"+langSan);
+				final YamlConfiguration yml = LoadYaml(
+					plugin,
+					"languages/"+utilsString.ensureEnds(".yml", langSan)
+				);
 				if(yml != null) {
 					// populate phrases
 					synchronized(this.phrases) {
 						for(final String key : yml.getKeys(false)) {
+							if(utils.isEmpty(key))   continue;
+							if(key.startsWith("#"))  continue;
+							if(key.startsWith("//")) continue;
 							// msg string
 							if(this.phrases.containsKey(key))
 								this.phrases.put(key, yml.getString(key));
@@ -95,7 +103,7 @@ public class xLang {
 								log().warning("Unknown lang key in "+utilsString.ensureEnds(".yml", langSan)+" '"+key+"'");
 						}
 					}
-					this.currentLang = langSan;
+					this.current = langSan;
 					return true;
 				}
 			} catch (Exception e) {
@@ -162,6 +170,8 @@ public class xLang {
 	// get message/phrase
 	public String getMsg(final String key) {
 		if(key == null || key.isEmpty()) throw new NullPointerException();
+		if(this.current == null)
+			this.LoadDefaults();
 		final String msg = this.phrases.get(key);
 		if(!utils.isEmpty(msg))
 			return msg;
@@ -170,6 +180,8 @@ public class xLang {
 	}
 	public String[] getMsgArray(final String key) {
 		if(key == null || key.isEmpty()) throw new NullPointerException();
+		if(this.current == null)
+			this.LoadDefaults();
 		final String[] arr = this.arrays.get(key);
 		if(arr != null)
 			return arr;
