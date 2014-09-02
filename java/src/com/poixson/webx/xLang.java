@@ -39,7 +39,20 @@ public class xLang {
 
 	// default phrases
 	protected void doLoadDefaults() {
-		//addDefault("", "");
+		addDefault(webxDefines.LANG_CHAT_PREFIX,        "[WebX] "           );
+		addDefault(webxDefines.LANG_RELOADING,          "Reloading.."       );
+		addDefault(webxDefines.LANG_FINISHED_RELOADING, "Finished reloading");
+		addDefault(webxDefines.LANG_NO_PERMISSION,      "No permission."    );
+		addDefault(webxDefines.LANG_NO_CHEATING,        "No cheating!"      );
+		addDefault(webxDefines.LANG_CLICK_SPAM,         "Please wait."      );
+		// signs
+		addDefault(webxDefines.LANG_SIGN_INVALID,       "Invalid sign."     );
+		addDefault(webxDefines.LANG_SIGN_REMOVED,       "Sign removed."     );
+		addDefault(webxDefines.LANG_SIGN_MASTER,        new String[] { "Plugin" });
+		// mailboxes
+		addDefault(webxDefines.LANG_MAILBOX_TITLE,      "MailBox");
+		addDefault(webxDefines.LANG_MAILBOX_OPENED,     "MailBox opened.");
+		addDefault(webxDefines.LANG_MAILBOX_CLOSED,     "MailBox saved.");
 	}
 	protected void addDefault(final String name, final String msg) {
 		if(utils.isEmpty(name)) throw new NullPointerException();
